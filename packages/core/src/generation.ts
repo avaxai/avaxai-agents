@@ -487,6 +487,26 @@ export async function generateText({
                 }
             }
             break;
+        case ModelProviderName.OPENROUTER_ANTHROPIC:
+            {
+                switch (modelClass) {
+                    case ModelClass.LARGE:
+                        {
+                            model =
+                                runtime.getSetting("LARGE_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                    case ModelClass.SMALL:
+                        {
+                            model =
+                                runtime.getSetting("SMALL_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                }
+            }
+            break;
     }
 
     elizaLogger.info("Selected model:", model);
@@ -1287,6 +1307,37 @@ export async function generateText({
                 elizaLogger.debug(
                     "Successfully received response from Livepeer model"
                 );
+                break;
+            }
+
+            case ModelProviderName.OPENROUTER_ANTHROPIC: {
+                elizaLogger.debug("Initializing OpenRouter Anthropic model.");
+                const serverUrl = getEndpoint(provider);
+                const openrouter = createOpenAI({
+                    apiKey,
+                    baseURL: serverUrl,
+                    fetch: runtime.fetch,
+                });
+
+                const { text: openrouterResponse } = await aiGenerateText({
+                    model: openrouter.languageModel(model),
+                    prompt: context,
+                    temperature: temperature,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                response = openrouterResponse;
+                elizaLogger.debug("Received response from OpenRouter model.");
                 break;
             }
 
@@ -2219,6 +2270,8 @@ export async function handleProvider(
             return await handleDeepSeek(options);
         case ModelProviderName.LIVEPEER:
             return await handleLivepeer(options);
+        case ModelProviderName.OPENROUTER_ANTHROPIC:
+          return await handleOpenRouter(options);
         default: {
             const errorMessage = `Unsupported provider: ${provider}`;
             elizaLogger.error(errorMessage);
