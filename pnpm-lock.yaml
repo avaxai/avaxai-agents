@@ -526,6 +526,9 @@ importers:
       '@elizaos/plugin-zksync-era':
         specifier: workspace:*
         version: link:../packages/plugin-zksync-era
+      '@supabase/supabase-js':
+        specifier: 2.46.2
+        version: 2.46.2(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       '@types/body-parser':
         specifier: 1.19.5
         version: 1.19.5
@@ -46687,7 +46690,7 @@ snapshots:
 
   '@types/ws@8.5.14':
     dependencies:
-      '@types/node': 22.13.1
+      '@types/node': 20.17.9
 
   '@types/ws@8.5.3':
     dependencies:

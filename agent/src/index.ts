@@ -165,9 +165,17 @@ import arbitragePlugin from "@elizaos/plugin-arbitrage";
 import express from 'express';
 import bodyParser from 'body-parser';
 
+// Supabase SDK to call the database directly
+import { createClient } from '@supabase/supabase-js';
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
+
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+// Store active agents in memory
+const activeAgents = new Map();
 
 export const wait = (minTime = 1000, maxTime = 3000) => {
     const waitTime =
@@ -1489,9 +1497,6 @@ const startAgents = async () => {
     const charactersArg = args.characters || args.character;
     let characters = [defaultCharacter];
 
-    // Store active agents in memory
-    const activeAgents = new Map();
-
     if (process.env.IQ_WALLET_ADDRESS && process.env.IQSOlRPC) {
         characters = await loadCharacterFromOnchain();
     }
@@ -1509,6 +1514,8 @@ const startAgents = async () => {
         for (const character of characters) {
           const runtime = await startAgent(character, directClient);
             // Store the runtime in our activeAgents map
+            elizaLogger.info(`Started ${character.name} as ${runtime.agentId}`);
+
             activeAgents.set(runtime.agentId, runtime);
         }
     } catch (error) {
@@ -1541,6 +1548,11 @@ const startAgents = async () => {
         return activeAgents.get(agentId);
     };
 
+    // Add method to stop and remove an agent
+    directClient.stopAgent = (agentId: string) => {
+        return directClient.stopAgent(agentId);
+    };
+
     directClient.getAllAgents = () => {
         return Array.from(activeAgents.values());
     };
@@ -1548,14 +1560,26 @@ const startAgents = async () => {
     directClient.loadCharacterTryPath = loadCharacterTryPath;
     directClient.jsonToCharacter = jsonToCharacter;
 
-    ////////////////////////////////////////////////////////////////
-    // Start of Express server
-    ////////////////////////////////////////////////////////////////
+    await startAPIServer(directClient);
+
+    directClient.start(serverPort);
+
+    if (serverPort !== Number.parseInt(settings.SERVER_PORT || "3000")) {
+        elizaLogger.log(`Server started on alternate port ${serverPort}`);
+    }
+
+    elizaLogger.info(
+        "Run `pnpm start:client` to start the client and visit the outputted URL (http://localhost:5173) to chat with your agents. When running multiple agents, use client with different port `SERVER_PORT=3001 pnpm start:client`"
+    );
+};
+
+// Start of Express server
+export async function startAPIServer(directClient: DirectClient) {
     const app = express();
     app.use(bodyParser.json());
 
     // POST endpoint for character creation
-    app.post('/api/characters', async (req, res) => {
+    app.post('/api/agents', async (req, res) => {
         try {
             const characterConfig = req.body;
             
@@ -1580,7 +1604,7 @@ const startAgents = async () => {
     });
 
     // GET endpoint to list all active agents
-    app.get('/api/characters', (req, res) => {
+    app.get('/api/agents', (req, res) => {
         const agents = directClient.getAllAgents();
         res.json({
             agents: agents.map(agent => ({
@@ -1590,25 +1614,33 @@ const startAgents = async () => {
         });
     });
 
+    // GET endpoint to check if an agent is active
+    app.get('/api/agents/:agentId', (req, res) => {
+        const agentId = req.params.agentId;
+        const agent = directClient.getAgent(agentId);
+        if (agent) {
+            res.json({
+                agentId: agent.agentId,
+                characterName: agent.character.name
+            });
+        } else {
+            res.status(404).json({ error: 'Agent not found' });
+        }
+    });
+
+    // DELETE endpoint to stop and remove an agent
+    app.delete('/api/agents/:agentId', (req, res) => {
+        const agentId = req.params.agentId;
+        directClient.stopAgent(agentId);
+        res.status(204).send();
+    });
+
     // Start the Express server
     const apiPort = Number.parseInt(process.env.API_PORT || "3001");
     app.listen(apiPort, () => {
         elizaLogger.info(`API server listening on port ${apiPort}`);
     });
-    ////////////////////////////////////////////////////////////////
-    // End of Express server
-    ////////////////////////////////////////////////////////////////
-
-    directClient.start(serverPort);
-
-    if (serverPort !== Number.parseInt(settings.SERVER_PORT || "3000")) {
-        elizaLogger.log(`Server started on alternate port ${serverPort}`);
-    }
-
-    elizaLogger.info(
-        "Run `pnpm start:client` to start the client and visit the outputted URL (http://localhost:5173) to chat with your agents. When running multiple agents, use client with different port `SERVER_PORT=3001 pnpm start:client`"
-    );
-};
+}
 
 startAgents().catch((error) => {
     elizaLogger.error("Unhandled error in startAgents:", error);

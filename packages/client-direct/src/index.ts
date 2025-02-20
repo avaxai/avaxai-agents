@@ -1030,6 +1030,15 @@ export class DirectClient {
         return this.agents.get(agentId);
     }
 
+    public stopAgent(agentId: string): boolean {
+        if (!this.agents.has(agentId)) {
+            throw new Error(`No agent found with ID ${agentId}`);
+        }
+        this.agents.delete(agentId);
+        elizaLogger.info(`Successfully stopped agent ${agentId}`);
+        return true;
+    }
+
     public getAllAgents(): any[] {
         return Array.from(this.agents.values());
     }
