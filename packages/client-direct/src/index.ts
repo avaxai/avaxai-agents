@@ -21,6 +21,7 @@ import {
     stringToUuid,
     settings,
     type IAgentRuntime,
+    type UUID,
 } from "@elizaos/core";
 import { createApiRouter } from "./api.ts";
 import * as fs from "fs";
@@ -1025,18 +1026,12 @@ export class DirectClient {
         }
     }
 
-
-    public getAgent(agentId: string): any {
+    public getAgent(agentId: UUID): any {
         return this.agents.get(agentId);
     }
 
-    public stopAgent(agentId: string): boolean {
-        if (!this.agents.has(agentId)) {
-            throw new Error(`No agent found with ID ${agentId}`);
-        }
-        this.agents.delete(agentId);
-        elizaLogger.info(`Successfully stopped agent ${agentId}`);
-        return true;
+    public stopAgent(agentId: UUID): any {
+        return this.agents.delete(agentId);
     }
 
     public getAllAgents(): any[] {

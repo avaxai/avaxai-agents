@@ -47,6 +47,7 @@ import {
     settings,
     stringToUuid,
     validateCharacterConfig,
+    type UUID,
 } from "@elizaos/core";
 import { zgPlugin } from "@elizaos/plugin-0g";
 import { footballPlugin } from "@elizaos/plugin-football";
@@ -172,7 +173,7 @@ const __filename = fileURLToPath(import.meta.url); // get the resolved path to t
 const __dirname = path.dirname(__filename); // get the name of the directory
 
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 // Store active agents in memory
 const activeAgents = new Map();
@@ -1495,7 +1496,9 @@ const startAgents = async () => {
     let serverPort = Number.parseInt(settings.SERVER_PORT || "3000");
     const args = parseArguments();
     const charactersArg = args.characters || args.character;
-    let characters = [defaultCharacter];
+    let characters = [];
+
+    elizaLogger.info('Starting agents with default character:', characters);
 
     if (process.env.IQ_WALLET_ADDRESS && process.env.IQSOlRPC) {
         characters = await loadCharacterFromOnchain();
@@ -1507,12 +1510,23 @@ const startAgents = async () => {
         characters = await loadCharacters(charactersArg);
     }
 
+    // Get agent characters from supabase
+    const { data, error } = await supabase.from('agents').select('character');
+
+    if (error) {
+        elizaLogger.error('Error fetching agent characters:', error);
+    } else {
+        elizaLogger.info('Agent characters fetched from supabase:', data);
+        characters = data.map((item) => item.character);
+    }
+
     // Normalize characters for injectable plugins
     characters = await Promise.all(characters.map(normalizeCharacter));
 
     try {
         for (const character of characters) {
-          const runtime = await startAgent(character, directClient);
+            elizaLogger.info(`Starting agent for character: ${character.name}`);
+            const runtime = await startAgent(character, directClient);
             // Store the runtime in our activeAgents map
             elizaLogger.info(`Started ${character.name} as ${runtime.agentId}`);
 
@@ -1544,12 +1558,12 @@ const startAgents = async () => {
     };
 
     // Add method to get active agents
-    directClient.getAgent = (agentId) => {
+    directClient.getAgent = (agentId: UUID) => {
         return activeAgents.get(agentId);
     };
 
     // Add method to stop and remove an agent
-    directClient.stopAgent = (agentId: string) => {
+    directClient.stopAgent = (agentId: UUID) => {
         return directClient.stopAgent(agentId);
     };
 
