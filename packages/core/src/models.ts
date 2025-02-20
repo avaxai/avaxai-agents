@@ -1151,10 +1151,43 @@ export const models: Models = {
             },
         },
     },
+    [ModelProviderName.OPENROUTER_OPENAI]: {
+        endpoint: "https://openrouter.ai/api/v1",
+        model: {
+            [ModelClass.SMALL]: {
+                name: "openai/gpt-4o-mini",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.6,
+            },
+            [ModelClass.MEDIUM]: {
+                name: "openai/gpt-4o",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.6,
+            },
+            [ModelClass.LARGE]: {
+                name: "openai/gpt-4o",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.6,
+            },
+            [ModelClass.EMBEDDING]: {
+                name: "text-embedding-3-small",
+            },
+        },
+    },
     [ModelProviderName.OPENROUTER_ANTHROPIC]: {
         endpoint: "https://openrouter.ai/api/v1",
-        // Available models: https://openrouter.ai/models
-        // To test other models, change the models below
         model: {
             [ModelClass.SMALL]: {
                 name:
@@ -1194,6 +1227,152 @@ export const models: Models = {
             },
             [ModelClass.EMBEDDING]: {
                 name: "text-embedding-3-small",
+            },
+        },
+    },
+    [ModelProviderName.OPENROUTER_GROK]: {
+        endpoint: "https://openrouter.ai/api/v1",
+        model: {
+            [ModelClass.SMALL]: {
+                name: "x-ai/grok-2-1212",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.MEDIUM]: {
+                name: "x-ai/grok-2-1212",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.LARGE]: {
+                name: "x-ai/grok-2-1212",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.EMBEDDING]: {
+                name: "x-ai/grok-2-1212",
+            },
+        },
+    },
+    [ModelProviderName.OPENROUTER_GOOGLE]: {
+        endpoint: "https://openrouter.ai/api/v1",
+        model: {
+            [ModelClass.SMALL]: {
+                name:
+                    settings.SMALL_GOOGLE_MODEL ||
+                    settings.GOOGLE_MODEL ||
+                    "gemini-2.0-flash-exp",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.MEDIUM]: {
+                name:
+                    settings.MEDIUM_GOOGLE_MODEL ||
+                    settings.GOOGLE_MODEL ||
+                    "gemini-2.0-flash-exp",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.LARGE]: {
+                name:
+                    settings.LARGE_GOOGLE_MODEL ||
+                    settings.GOOGLE_MODEL ||
+                    "gemini-2.0-flash-exp",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.EMBEDDING]: {
+                name:
+                    settings.EMBEDDING_GOOGLE_MODEL ||
+                    settings.GOOGLE_MODEL ||
+                    "text-embedding-004",
+            },
+        },
+    },
+    [ModelProviderName.OPENROUTER_MISTRAL]: {
+        endpoint: "https://openrouter.ai/api/v1",
+        model: {
+            [ModelClass.SMALL]: {
+                name: "mistralai/mistral-small-24b-instruct-2501:free",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.MEDIUM]: {
+                name: "mistralai/mistral-large-2411",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.LARGE]: {
+                name: "mistralai/mistral-large-2411",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+        },
+    },
+    [ModelProviderName.OPENROUTER_DEEPSEEK]: {
+        endpoint: "https://openrouter.ai/api/v1",
+        model: {
+            [ModelClass.SMALL]: {
+                name: "deepseek/deepseek-chat:free",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.7,
+            },
+            [ModelClass.MEDIUM]: {
+                name: "deepseek/deepseek-chat:free",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.7,
+            },
+            [ModelClass.LARGE]: {
+                name: "deepseek/deepseek-chat:free",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.0,
+                presence_penalty: 0.0,
+                temperature: 0.7,
             },
         },
     },

@@ -233,7 +233,12 @@ export type Models = {
     [ModelProviderName.INFERA]: Model;
     [ModelProviderName.BEDROCK]: Model;
     [ModelProviderName.ATOMA]: Model;
+    [ModelProviderName.OPENROUTER_OPENAI]: Model;
     [ModelProviderName.OPENROUTER_ANTHROPIC]: Model;
+    [ModelProviderName.OPENROUTER_GROK]: Model;
+    [ModelProviderName.OPENROUTER_GOOGLE]: Model;
+    [ModelProviderName.OPENROUTER_MISTRAL]: Model;
+    [ModelProviderName.OPENROUTER_DEEPSEEK]: Model;
 };
 
 /**
@@ -273,7 +278,12 @@ export enum ModelProviderName {
     INFERA = "infera",
     BEDROCK = "bedrock",
     ATOMA = "atoma",
+    OPENROUTER_OPENAI = "openrouter_openai",
     OPENROUTER_ANTHROPIC = "openrouter_anthropic",
+    OPENROUTER_GROK = "openrouter_grok",
+    OPENROUTER_GOOGLE = "openrouter_google",
+    OPENROUTER_MISTRAL = "openrouter_mistral",
+    OPENROUTER_DEEPSEEK = "openrouter_deepseek",
 }
 
 /**

@@ -487,7 +487,107 @@ export async function generateText({
                 }
             }
             break;
+        case ModelProviderName.OPENROUTER_OPENAI:
+            {
+                switch (modelClass) {
+                    case ModelClass.LARGE:
+                        {
+                            model =
+                                runtime.getSetting("LARGE_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                    case ModelClass.SMALL:
+                        {
+                            model =
+                                runtime.getSetting("SMALL_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                }
+            }
+            break;
         case ModelProviderName.OPENROUTER_ANTHROPIC:
+            {
+                switch (modelClass) {
+                    case ModelClass.LARGE:
+                        {
+                            model =
+                                runtime.getSetting("LARGE_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                    case ModelClass.SMALL:
+                        {
+                            model =
+                                runtime.getSetting("SMALL_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                }
+            }
+            break;
+        case ModelProviderName.OPENROUTER_GROK:
+            {
+                switch (modelClass) {
+                    case ModelClass.LARGE:
+                        {
+                            model =
+                                runtime.getSetting("LARGE_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                    case ModelClass.SMALL:
+                        {
+                            model =
+                                runtime.getSetting("SMALL_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                }
+            }
+            break;
+        case ModelProviderName.OPENROUTER_GOOGLE:
+            {
+                switch (modelClass) {
+                    case ModelClass.LARGE:
+                        {
+                            model =
+                                runtime.getSetting("LARGE_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                    case ModelClass.SMALL:
+                        {
+                            model =
+                                runtime.getSetting("SMALL_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                }
+            }
+            break;
+        case ModelProviderName.OPENROUTER_MISTRAL:
+            {
+                switch (modelClass) {
+                    case ModelClass.LARGE:
+                        {
+                            model =
+                                runtime.getSetting("LARGE_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                    case ModelClass.SMALL:
+                        {
+                            model =
+                                runtime.getSetting("SMALL_OPENROUTER_MODEL") ||
+                                model;
+                        }
+                        break;
+                }
+            }
+            break;
+        case ModelProviderName.OPENROUTER_DEEPSEEK:
             {
                 switch (modelClass) {
                     case ModelClass.LARGE:
@@ -1309,9 +1409,165 @@ export async function generateText({
                 );
                 break;
             }
+            
+            case ModelProviderName.OPENROUTER_OPENAI: {
+                elizaLogger.debug("Initializing OpenRouter OpenAI model.");
+                const serverUrl = getEndpoint(provider);
+                const openrouter = createOpenAI({
+                    apiKey,
+                    baseURL: serverUrl,
+                    fetch: runtime.fetch,
+                });
+
+                const { text: openrouterResponse } = await aiGenerateText({
+                    model: openrouter.languageModel(model),
+                    prompt: context,
+                    temperature: temperature,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                response = openrouterResponse;
+                elizaLogger.debug("Received response from OpenRouter model.");
+                break;
+            }
 
             case ModelProviderName.OPENROUTER_ANTHROPIC: {
                 elizaLogger.debug("Initializing OpenRouter Anthropic model.");
+                const serverUrl = getEndpoint(provider);
+                const openrouter = createOpenAI({
+                    apiKey,
+                    baseURL: serverUrl,
+                    fetch: runtime.fetch,
+                });
+
+                const { text: openrouterResponse } = await aiGenerateText({
+                    model: openrouter.languageModel(model),
+                    prompt: context,
+                    temperature: temperature,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                response = openrouterResponse;
+                elizaLogger.debug("Received response from OpenRouter model.");
+                break;
+            }
+
+            case ModelProviderName.OPENROUTER_GROK: {
+                elizaLogger.debug("Initializing OpenRouter Grok model.");
+                const serverUrl = getEndpoint(provider);
+                const openrouter = createOpenAI({
+                    apiKey,
+                    baseURL: serverUrl,
+                    fetch: runtime.fetch,
+                });
+
+                const { text: openrouterResponse } = await aiGenerateText({
+                    model: openrouter.languageModel(model),
+                    prompt: context,
+                    temperature: temperature,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                response = openrouterResponse;
+                elizaLogger.debug("Received response from OpenRouter model.");
+                break;
+            }
+
+            case ModelProviderName.OPENROUTER_GOOGLE: {
+                elizaLogger.debug("Initializing OpenRouter Google model.");
+                const serverUrl = getEndpoint(provider);
+                const openrouter = createOpenAI({
+                    apiKey,
+                    baseURL: serverUrl,
+                    fetch: runtime.fetch,
+                });
+
+                const { text: openrouterResponse } = await aiGenerateText({
+                    model: openrouter.languageModel(model),
+                    prompt: context,
+                    temperature: temperature,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                response = openrouterResponse;
+                elizaLogger.debug("Received response from OpenRouter model.");
+                break;
+            }
+
+            case ModelProviderName.OPENROUTER_MISTRAL: {
+                elizaLogger.debug("Initializing OpenRouter Mistral model.");
+                const serverUrl = getEndpoint(provider);
+                const openrouter = createOpenAI({
+                    apiKey,
+                    baseURL: serverUrl,
+                    fetch: runtime.fetch,
+                });
+
+                const { text: openrouterResponse } = await aiGenerateText({
+                    model: openrouter.languageModel(model),
+                    prompt: context,
+                    temperature: temperature,
+                    system:
+                        runtime.character.system ??
+                        settings.SYSTEM_PROMPT ??
+                        undefined,
+                    tools: tools,
+                    onStepFinish: onStepFinish,
+                    maxSteps: maxSteps,
+                    maxTokens: max_response_length,
+                    frequencyPenalty: frequency_penalty,
+                    presencePenalty: presence_penalty,
+                    experimental_telemetry: experimental_telemetry,
+                });
+
+                response = openrouterResponse;
+                elizaLogger.debug("Received response from OpenRouter model.");
+                break;
+            }
+            
+            
+            case ModelProviderName.OPENROUTER_DEEPSEEK: {
+                elizaLogger.debug("Initializing OpenRouter Deepseek model.");
                 const serverUrl = getEndpoint(provider);
                 const openrouter = createOpenAI({
                     apiKey,
@@ -2270,8 +2526,18 @@ export async function handleProvider(
             return await handleDeepSeek(options);
         case ModelProviderName.LIVEPEER:
             return await handleLivepeer(options);
+        case ModelProviderName.OPENROUTER_OPENAI:
+            return await handleOpenRouter(options);
         case ModelProviderName.OPENROUTER_ANTHROPIC:
-          return await handleOpenRouter(options);
+            return await handleOpenRouter(options);
+        case ModelProviderName.OPENROUTER_GROK:
+            return await handleOpenRouter(options);
+        case ModelProviderName.OPENROUTER_GOOGLE:
+            return await handleOpenRouter(options);
+        case ModelProviderName.OPENROUTER_MISTRAL:
+            return await handleOpenRouter(options);
+        case ModelProviderName.OPENROUTER_DEEPSEEK:
+            return await handleOpenRouter(options);
         default: {
             const errorMessage = `Unsupported provider: ${provider}`;
             elizaLogger.error(errorMessage);
