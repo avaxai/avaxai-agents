@@ -160,6 +160,12 @@ import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
 
 import { trikonPlugin } from "@elizaos/plugin-trikon";
 import arbitragePlugin from "@elizaos/plugin-arbitrage";
+
+// Utilising Express for API endpoints
+import express from 'express';
+import bodyParser from 'body-parser';
+
+
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
@@ -672,6 +678,11 @@ export function getTokenForProvider(
             return (
                 character.settings?.secrets?.LIVEPEER_GATEWAY_URL ||
                 settings.LIVEPEER_GATEWAY_URL
+            );
+        case ModelProviderName.OPENROUTER_ANTHROPIC:
+            return (
+                character.settings?.secrets?.OPENROUTER_API_KEY ||
+                settings.OPENROUTER_API_KEY
             );
         default:
             const errorMessage = `Failed to get token - unsupported model provider: ${provider}`;
@@ -1478,6 +1489,9 @@ const startAgents = async () => {
     const charactersArg = args.characters || args.character;
     let characters = [defaultCharacter];
 
+    // Store active agents in memory
+    const activeAgents = new Map();
+
     if (process.env.IQ_WALLET_ADDRESS && process.env.IQSOlRPC) {
         characters = await loadCharacterFromOnchain();
     }
@@ -1493,7 +1507,9 @@ const startAgents = async () => {
 
     try {
         for (const character of characters) {
-            await startAgent(character, directClient);
+          const runtime = await startAgent(character, directClient);
+            // Store the runtime in our activeAgents map
+            activeAgents.set(runtime.agentId, runtime);
         }
     } catch (error) {
         elizaLogger.error("Error starting agents:", error);
@@ -1507,17 +1523,81 @@ const startAgents = async () => {
         serverPort++;
     }
 
-    // upload some agent functionality into directClient
+    // Modify the startAgent function on directClient to store new agents
     directClient.startAgent = async (character) => {
         // Handle plugins
         character.plugins = await handlePluginImporting(character.plugins);
 
-        // wrap it so we don't have to inject directClient later
-        return startAgent(character, directClient);
+        const runtime = await startAgent(character, directClient);
+        
+        // Store the new runtime in our activeAgents map
+        activeAgents.set(runtime.agentId, runtime);
+        
+        return runtime;
+    };
+
+    // Add method to get active agents
+    directClient.getAgent = (agentId) => {
+        return activeAgents.get(agentId);
+    };
+
+    directClient.getAllAgents = () => {
+        return Array.from(activeAgents.values());
     };
 
     directClient.loadCharacterTryPath = loadCharacterTryPath;
     directClient.jsonToCharacter = jsonToCharacter;
+
+    ////////////////////////////////////////////////////////////////
+    // Start of Express server
+    ////////////////////////////////////////////////////////////////
+    const app = express();
+    app.use(bodyParser.json());
+
+    // POST endpoint for character creation
+    app.post('/api/characters', async (req, res) => {
+        try {
+            const characterConfig = req.body;
+            
+            validateCharacterConfig(characterConfig);
+            const normalizedCharacter = await normalizeCharacter(characterConfig);
+            
+            const runtime = await startAgent(normalizedCharacter, directClient);
+            // The runtime is now automatically stored in activeAgents via the modified startAgent
+
+            res.status(201).json({
+                message: 'Character created successfully',
+                agentId: runtime.agentId,
+                characterName: normalizedCharacter.name
+            });
+        } catch (error) {
+            elizaLogger.error('Error creating character:', error);
+            res.status(400).json({
+                error: 'Failed to create character',
+                message: error.message
+            });
+        }
+    });
+
+    // GET endpoint to list all active agents
+    app.get('/api/characters', (req, res) => {
+        const agents = directClient.getAllAgents();
+        res.json({
+            agents: agents.map(agent => ({
+                agentId: agent.agentId,
+                characterName: agent.character.name
+            }))
+        });
+    });
+
+    // Start the Express server
+    const apiPort = Number.parseInt(process.env.API_PORT || "3001");
+    app.listen(apiPort, () => {
+        elizaLogger.info(`API server listening on port ${apiPort}`);
+    });
+    ////////////////////////////////////////////////////////////////
+    // End of Express server
+    ////////////////////////////////////////////////////////////////
 
     directClient.start(serverPort);
 
