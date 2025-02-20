@@ -233,6 +233,7 @@ export type Models = {
     [ModelProviderName.INFERA]: Model;
     [ModelProviderName.BEDROCK]: Model;
     [ModelProviderName.ATOMA]: Model;
+    [ModelProviderName.OPENROUTER_ANTHROPIC]: Model;
 };
 
 /**
@@ -272,6 +273,7 @@ export enum ModelProviderName {
     INFERA = "infera",
     BEDROCK = "bedrock",
     ATOMA = "atoma",
+    OPENROUTER_ANTHROPIC = "openrouter_anthropic",
 }
 
 /**

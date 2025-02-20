@@ -1024,6 +1024,15 @@ export class DirectClient {
             });
         }
     }
+
+
+    public getAgent(agentId: string): any {
+        return this.agents.get(agentId);
+    }
+
+    public getAllAgents(): any[] {
+        return Array.from(this.agents.values());
+    }
 }
 
 export const DirectClientInterface: Client = {

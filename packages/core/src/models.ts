@@ -1151,6 +1151,52 @@ export const models: Models = {
             },
         },
     },
+    [ModelProviderName.OPENROUTER_ANTHROPIC]: {
+        endpoint: "https://openrouter.ai/api/v1",
+        // Available models: https://openrouter.ai/models
+        // To test other models, change the models below
+        model: {
+            [ModelClass.SMALL]: {
+                name:
+                    settings.SMALL_OPENROUTER_MODEL ||
+                    settings.OPENROUTER_MODEL ||
+                    "anthropic/claude-3.5-sonnet",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.MEDIUM]: {
+                name:
+                    settings.MEDIUM_OPENROUTER_MODEL ||
+                    settings.OPENROUTER_MODEL ||
+                    "anthropic/claude-3.5-sonnet",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.LARGE]: {
+                name:
+                    settings.LARGE_OPENROUTER_MODEL ||
+                    settings.OPENROUTER_MODEL ||
+                    "anthropic/claude-3.5-sonnet",
+                stop: [],
+                maxInputTokens: 128000,
+                maxOutputTokens: 8192,
+                frequency_penalty: 0.4,
+                presence_penalty: 0.4,
+                temperature: 0.7,
+            },
+            [ModelClass.EMBEDDING]: {
+                name: "text-embedding-3-small",
+            },
+        },
+    },
 };
 
 export function getModelSettings(
