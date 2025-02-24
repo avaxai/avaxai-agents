@@ -688,7 +688,32 @@ export function getTokenForProvider(
                 character.settings?.secrets?.LIVEPEER_GATEWAY_URL ||
                 settings.LIVEPEER_GATEWAY_URL
             );
+        case ModelProviderName.OPENROUTER_OPENAI:
+            return (
+                character.settings?.secrets?.OPENROUTER_API_KEY ||
+                settings.OPENROUTER_API_KEY
+            );
         case ModelProviderName.OPENROUTER_ANTHROPIC:
+            return (
+                character.settings?.secrets?.OPENROUTER_API_KEY ||
+                settings.OPENROUTER_API_KEY
+            );
+        case ModelProviderName.OPENROUTER_GROK:
+            return (
+                character.settings?.secrets?.OPENROUTER_API_KEY ||
+                settings.OPENROUTER_API_KEY
+            );
+        case ModelProviderName.OPENROUTER_GOOGLE:
+            return (
+                character.settings?.secrets?.OPENROUTER_API_KEY ||
+                settings.OPENROUTER_API_KEY
+            );
+        case ModelProviderName.OPENROUTER_MISTRAL:
+            return (
+                character.settings?.secrets?.OPENROUTER_API_KEY ||
+                settings.OPENROUTER_API_KEY
+            );
+        case ModelProviderName.OPENROUTER_DEEPSEEK:
             return (
                 character.settings?.secrets?.OPENROUTER_API_KEY ||
                 settings.OPENROUTER_API_KEY
@@ -1602,6 +1627,8 @@ export async function startAPIServer(directClient: DirectClient) {
             
             const runtime = await startAgent(normalizedCharacter, directClient);
             // The runtime is now automatically stored in activeAgents via the modified startAgent
+
+            console.log(runtime);
 
             res.status(201).json({
                 message: 'Character created successfully',
