@@ -1348,7 +1348,7 @@ export const models: Models = {
         endpoint: "https://openrouter.ai/api/v1",
         model: {
             [ModelClass.SMALL]: {
-                name: "deepseek/deepseek-chat:free",
+                name: "deepseek/deepseek-chat",
                 stop: [],
                 maxInputTokens: 128000,
                 maxOutputTokens: 8192,
@@ -1357,7 +1357,7 @@ export const models: Models = {
                 temperature: 0.7,
             },
             [ModelClass.MEDIUM]: {
-                name: "deepseek/deepseek-chat:free",
+                name: "deepseek/deepseek-chat",
                 stop: [],
                 maxInputTokens: 128000,
                 maxOutputTokens: 8192,
@@ -1366,7 +1366,7 @@ export const models: Models = {
                 temperature: 0.7,
             },
             [ModelClass.LARGE]: {
-                name: "deepseek/deepseek-chat:free",
+                name: "deepseek/deepseek-chat",
                 stop: [],
                 maxInputTokens: 128000,
                 maxOutputTokens: 8192,
