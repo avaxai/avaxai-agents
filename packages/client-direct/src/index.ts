@@ -198,18 +198,21 @@ export class DirectClient {
                 const roomId = stringToUuid(
                     req.body.roomId ?? "default-room-" + agentId
                 );
-                const userId = stringToUuid(req.body.userId ?? "user");
+
+                // Note that we pass in the user's wallet address to obtain the same UUID that is generated for the address in the accounts table
+                const address = req.body.address.toLowerCase();
+                const userId = stringToUuid(address ?? "user");
 
                 let runtime = this.agents.get(agentId);
 
                 // if runtime is null, look for runtime with the same name
-                if (!runtime) {
-                    runtime = Array.from(this.agents.values()).find(
-                        (a) =>
-                            a.character.name.toLowerCase() ===
-                            agentId.toLowerCase()
-                    );
-                }
+                // if (!runtime) {
+                //     runtime = Array.from(this.agents.values()).find(
+                //         (a) =>
+                //             a.character.name.toLowerCase() ===
+                //             agentId.toLowerCase()
+                //     );
+                // }
 
                 if (!runtime) {
                     res.status(404).send("Agent not found");
@@ -219,9 +222,9 @@ export class DirectClient {
                 await runtime.ensureConnection(
                     userId,
                     roomId,
-                    req.body.userName,
-                    req.body.name,
-                    "direct"
+                    address,
+                    address,
+                    address,
                 );
 
                 const text = req.body.text;
