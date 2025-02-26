@@ -1677,7 +1677,7 @@ export async function startAPIServer(directClient: DirectClient) {
 
     // Health check endpoint
     app.get('/api/ping', (req, res) => {
-        res.json({ status: 'ok' });
+        res.status(200).json({ status: 'ok' });
     });
 
     // Start the Express server
