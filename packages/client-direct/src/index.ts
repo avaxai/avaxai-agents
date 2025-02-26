@@ -652,6 +652,7 @@ export class DirectClient {
                 }
             }
         );
+        
         this.app.get(
             "/fine-tune/:assetId",
             async (req: express.Request, res: express.Response) => {

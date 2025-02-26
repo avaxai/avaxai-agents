@@ -162,10 +162,6 @@ import { quickIntelPlugin } from "@elizaos/plugin-quick-intel";
 import { trikonPlugin } from "@elizaos/plugin-trikon";
 import arbitragePlugin from "@elizaos/plugin-arbitrage";
 
-// Utilising Express for API endpoints
-import express from 'express';
-import bodyParser from 'body-parser';
-
 // Supabase SDK to call the database directly
 import { createClient } from '@supabase/supabase-js';
 
@@ -1592,8 +1588,6 @@ const startAgents = async () => {
     directClient.loadCharacterTryPath = loadCharacterTryPath;
     directClient.jsonToCharacter = jsonToCharacter;
 
-    await startAPIServer(directClient);
-
     directClient.start(serverPort);
 
     if (serverPort !== Number.parseInt(settings.SERVER_PORT || "3000")) {
@@ -1604,88 +1598,6 @@ const startAgents = async () => {
         "Run `pnpm start:client` to start the client and visit the outputted URL (http://localhost:5173) to chat with your agents. When running multiple agents, use client with different port `SERVER_PORT=3001 pnpm start:client`"
     );
 };
-
-// Start of Express server
-export async function startAPIServer(directClient: DirectClient) {
-    const app = express();
-    app.use(bodyParser.json());
-
-    // POST endpoint for character creation
-    app.post('/api/agents', async (req, res) => {
-        try {
-            console.log(req.body);  
-            const character = req.body;
-            
-            validateCharacterConfig(character);
-
-            const normalizedCharacter = await normalizeCharacter(character);
-            
-            const runtime = await startAgent(normalizedCharacter, directClient);
-            // The runtime is now automatically stored in activeAgents via the modified startAgent
-
-            res.status(201).json({
-                message: 'Character created successfully',
-                agentId: runtime.agentId,
-                characterName: normalizedCharacter.name
-            });
-        } catch (error) {
-            elizaLogger.error('Error creating character:', error);
-            res.status(400).json({
-                error: 'Failed to create character',
-                message: error.message
-            });
-        }
-    });
-
-    // GET endpoint to list all active agents
-    app.get('/api/agents', (req, res) => {
-        const agents = directClient.getAllAgents();
-        res.json({
-            agents: agents.map(agent => ({
-                agentId: agent.agentId,
-                characterName: agent.character.name
-            }))
-        });
-    });
-
-    // GET endpoint to check if an agent is active
-    app.get('/api/agents/:agentId', (req, res) => {
-        const agentId = req.params.agentId;
-        const agent = directClient.getAgent(agentId as UUID);
-        if (agent) {
-            res.json({
-                agentId: agent.agentId,
-                characterName: agent.character.name
-            });
-        } else {
-            res.status(404).json({ error: 'Agent not found' });
-        }
-    });
-
-    // DELETE endpoint to stop and remove an agent
-    app.delete('/api/agents/:agentId', (req, res) => {
-        const agentId = req.params.agentId;
-        const agent = directClient.getAgent(agentId as UUID);
-        
-        if (agent) {
-            directClient.unregisterAgent(agent);
-            res.status(200).json({ message: 'Agent runtime stopped' });
-        } else {
-            res.status(404).json({ error: 'Agent not found' });
-        }
-    });
-
-    // Health check endpoint
-    app.get('/api/ping', (req, res) => {
-        res.status(200).json({ status: 'ok' });
-    });
-
-    // Start the Express server
-    const apiPort = Number.parseInt(process.env.API_PORT || "3001");
-    app.listen(apiPort, () => {
-        elizaLogger.info(`API server listening on port ${apiPort}`);
-    });
-}
 
 startAgents().catch((error) => {
     elizaLogger.error("Unhandled error in startAgents:", error);

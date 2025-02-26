@@ -13,7 +13,7 @@ import {
     ServiceType,
     type Character,
 } from "@elizaos/core";
-
+import { normalizeCharacter } from "@elizaos/plugin-di";
 import type { TeeLogQuery, TeeLogService } from "@elizaos/plugin-tee-log";
 import { REST, Routes } from "discord.js";
 import type { DirectClient } from ".";
@@ -405,39 +405,34 @@ export function createApiRouter(
     );
 
     router.post("/agent/start", async (req, res) => {
-        const { characterPath, characterJson } = req.body;
-        console.log("characterPath:", characterPath);
-        console.log("characterJson:", characterJson);
+        const character: Character = req.body;
+        
         try {
-            let character: Character;
-            if (characterJson) {
-                character = await directClient.jsonToCharacter(
-                    characterPath,
-                    characterJson
-                );
-            } else if (characterPath) {
-                character =
-                    await directClient.loadCharacterTryPath(characterPath);
-            } else {
-                throw new Error("No character path or JSON provided");
-            }
-            await directClient.startAgent(character);
+            validateCharacterConfig(character);
+
+            const normalizedCharacter = await normalizeCharacter(character);
+            const runtime = await directClient.startAgent(normalizedCharacter);
+
             elizaLogger.log(`${character.name} started`);
 
-            res.json({
+            res.status(201).json({
+              message: 'Character created successfully',
                 id: character.id,
+                agentId: runtime.agentId,
+                characterName: runtime.character.name,
                 character: character,
             });
         } catch (e) {
             elizaLogger.error(`Error parsing character: ${e}`);
             res.status(400).json({
-                error: e.message,
+                error: 'Failed to create character',
+                message: e.message,
             });
             return;
         }
     });
 
-    router.post("/agents/:agentId/stop", async (req, res) => {
+    router.delete("/agents/:agentId/stop", async (req, res) => {
         const agentId = req.params.agentId;
         console.log("agentId", agentId);
         const agent: AgentRuntime = agents.get(agentId);
@@ -448,10 +443,15 @@ export function createApiRouter(
             agent.stop();
             directClient.unregisterAgent(agent);
             // if it has a different name, the agentId will change
-            res.json({ success: true });
+            res.status(200).json({ message: 'Agent runtime stopped' });
         } else {
             res.status(404).json({ error: "Agent not found" });
         }
+    });
+
+    // Health check endpoint
+    router.get('/ping', (req, res) => {
+        res.status(200).json({ status: 'ok' });
     });
 
     return router;
