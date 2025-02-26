@@ -172,11 +172,7 @@ import { createClient } from '@supabase/supabase-js';
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
 
-
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
-// Store active agents in memory
-const activeAgents = new Map();
 
 export const wait = (minTime = 1000, maxTime = 3000) => {
     const waitTime =
@@ -1536,13 +1532,20 @@ const startAgents = async () => {
     }
 
     // Get agent characters from supabase
-    const { data, error } = await supabase.from('agents').select('character');
+    const { data: agents, error } = await supabase
+      .from('agents')
+      .select('character, agentId, agentStatus');
 
     if (error) {
         elizaLogger.error('Error fetching agent characters:', error);
     } else {
-        elizaLogger.info('Agent characters fetched from supabase:', data);
-        characters = data.map((item) => item.character);
+        elizaLogger.info('Agent characters fetched from supabase:');
+        characters = agents.map((item) => {
+          item.character;
+          item.character.agentStatus = item.agentStatus;
+          item.character.agentId = item.agentId;
+          return item.character;
+        });
     }
 
     // Normalize characters for injectable plugins
@@ -1550,12 +1553,19 @@ const startAgents = async () => {
 
     try {
         for (const character of characters) {
-            elizaLogger.info(`Starting agent for character: ${character.name}`);
-            const runtime = await startAgent(character, directClient);
-            // Store the runtime in our activeAgents map
-            elizaLogger.info(`Started ${character.name} as ${runtime.agentId}`);
+            elizaLogger.info(`===================================================`);
+            elizaLogger.info(`Character ID: ${character.id}`);
+            elizaLogger.info(`Character Name: ${character.name}`);
+            elizaLogger.info(`Character NFT ID: ${character.agentId}`);
+            elizaLogger.info(`Character Agent Status: ${character.agentStatus}`);
+            elizaLogger.info(`===================================================`);
 
-            activeAgents.set(runtime.agentId, runtime);
+            if (character.agentStatus === "Online") {
+                elizaLogger.info(`Starting agent for character: ${character.name}`);
+                const runtime = await startAgent(character, directClient);
+                // Store the runtime in our activeAgents map
+                elizaLogger.info(`Started ${character.name} as ${runtime.agentId}`);
+            }
         }
     } catch (error) {
         elizaLogger.error("Error starting agents:", error);
@@ -1575,25 +1585,8 @@ const startAgents = async () => {
         character.plugins = await handlePluginImporting(character.plugins);
 
         const runtime = await startAgent(character, directClient);
-        
-        // Store the new runtime in our activeAgents map
-        activeAgents.set(runtime.agentId, runtime);
-        
+                
         return runtime;
-    };
-
-    // Add method to get active agents
-    directClient.getAgent = (agentId: UUID) => {
-        return activeAgents.get(agentId);
-    };
-
-    // Add method to stop and remove an agent
-    directClient.stopAgent = (agentId: UUID) => {
-        return directClient.stopAgent(agentId);
-    };
-
-    directClient.getAllAgents = () => {
-        return Array.from(activeAgents.values());
     };
 
     directClient.loadCharacterTryPath = loadCharacterTryPath;
@@ -1620,15 +1613,15 @@ export async function startAPIServer(directClient: DirectClient) {
     // POST endpoint for character creation
     app.post('/api/agents', async (req, res) => {
         try {
-            const characterConfig = req.body;
+            console.log(req.body);  
+            const character = req.body;
             
-            validateCharacterConfig(characterConfig);
-            const normalizedCharacter = await normalizeCharacter(characterConfig);
+            validateCharacterConfig(character);
+
+            const normalizedCharacter = await normalizeCharacter(character);
             
             const runtime = await startAgent(normalizedCharacter, directClient);
             // The runtime is now automatically stored in activeAgents via the modified startAgent
-
-            console.log(runtime);
 
             res.status(201).json({
                 message: 'Character created successfully',
@@ -1658,7 +1651,7 @@ export async function startAPIServer(directClient: DirectClient) {
     // GET endpoint to check if an agent is active
     app.get('/api/agents/:agentId', (req, res) => {
         const agentId = req.params.agentId;
-        const agent = directClient.getAgent(agentId);
+        const agent = directClient.getAgent(agentId as UUID);
         if (agent) {
             res.json({
                 agentId: agent.agentId,
@@ -1672,8 +1665,19 @@ export async function startAPIServer(directClient: DirectClient) {
     // DELETE endpoint to stop and remove an agent
     app.delete('/api/agents/:agentId', (req, res) => {
         const agentId = req.params.agentId;
-        directClient.stopAgent(agentId);
-        res.status(204).send();
+        const agent = directClient.getAgent(agentId as UUID);
+        
+        if (agent) {
+            directClient.unregisterAgent(agent);
+            res.status(200).json({ message: 'Agent runtime stopped' });
+        } else {
+            res.status(404).json({ error: 'Agent not found' });
+        }
+    });
+
+    // Health check endpoint
+    app.get('/api/ping', (req, res) => {
+        res.json({ status: 'ok' });
     });
 
     // Start the Express server

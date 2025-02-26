@@ -1030,10 +1030,6 @@ export class DirectClient {
         return this.agents.get(agentId);
     }
 
-    public stopAgent(agentId: UUID): any {
-        return this.agents.delete(agentId);
-    }
-
     public getAllAgents(): any[] {
         return Array.from(this.agents.values());
     }
