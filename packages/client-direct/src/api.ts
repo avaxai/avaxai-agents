@@ -15,9 +15,10 @@ import {
 } from "@elizaos/core";
 import { normalizeCharacter } from "@elizaos/plugin-di";
 import type { TeeLogQuery, TeeLogService } from "@elizaos/plugin-tee-log";
-import { REST, Routes } from "discord.js";
+import { REST } from "discord.js";
 import type { DirectClient } from ".";
 import { validateUuid } from "@elizaos/core";
+import { apiKeyAuth } from "./middleware.ts";
 
 interface UUIDParams {
     agentId: UUID;
@@ -72,6 +73,9 @@ export function createApiRouter(
     router.get("/hello", (req, res) => {
         res.json({ message: "Hello World!" });
     });
+
+    // Apply the API key authentication middleware to all routes below
+    router.use(apiKeyAuth);
 
     router.get("/agents", (req, res) => {
         const agentsList = Array.from(agents.values()).map((agent) => ({

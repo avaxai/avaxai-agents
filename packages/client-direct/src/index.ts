@@ -28,6 +28,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { createVerifiableLogApiRouter } from "./verifiable-log-api.ts";
 import OpenAI from "openai";
+import { apiKeyAuth } from "./middleware.ts";
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -109,6 +110,7 @@ Response format should be formatted in a JSON block like this:
 \`\`\`
 `;
 
+
 export class DirectClient {
     public app: express.Application;
     private agents: Map<string, AgentRuntime>; // container management
@@ -146,6 +148,9 @@ export class DirectClient {
         interface CustomRequest extends ExpressRequest {
             file?: Express.Multer.File;
         }
+
+        // Apply the API key authentication middleware to all routes below
+        this.app.use(apiKeyAuth);
 
         // Update the route handler to use CustomRequest instead of express.Request
         this.app.post(
@@ -195,24 +200,16 @@ export class DirectClient {
             upload.single("file"),
             async (req: express.Request, res: express.Response) => {
                 const agentId = req.params.agentId;
-                const roomId = stringToUuid(
-                    req.body.roomId ?? "default-room-" + agentId
-                );
-
-                // Note that we pass in the user's wallet address to obtain the same UUID that is generated for the address in the accounts table
-                const address = req.body.address.toLowerCase();
-                const userId = stringToUuid(address ?? "user");
+                const userId = req.body.userId
+                // If no roomId is given, the roomId generated will be the public room for the agent with the roomId being generated from the string "public-<agentId>"
+                // If roomId is passed, it should be a UUID that is being generated from the string "<userId>>-<agentId>".
+                // const roomId = stringToUuid(
+                //   req.body.roomId ?? "public-" + agentId
+                // );
+                const roomId = req.body.roomId;
+                const text = req.body.text;
 
                 let runtime = this.agents.get(agentId);
-
-                // if runtime is null, look for runtime with the same name
-                // if (!runtime) {
-                //     runtime = Array.from(this.agents.values()).find(
-                //         (a) =>
-                //             a.character.name.toLowerCase() ===
-                //             agentId.toLowerCase()
-                //     );
-                // }
 
                 if (!runtime) {
                     res.status(404).send("Agent not found");
@@ -222,12 +219,8 @@ export class DirectClient {
                 await runtime.ensureConnection(
                     userId,
                     roomId,
-                    address,
-                    address,
-                    address,
                 );
-
-                const text = req.body.text;
+                
                 // if empty text, directly return
                 if (!text) {
                     res.json([]);

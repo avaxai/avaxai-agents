@@ -46,7 +46,9 @@ CREATE TABLE accounts (
 
 CREATE TABLE rooms (
     "id" UUID PRIMARY KEY,
-    "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    "createdAt" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    "userId" UUID REFERENCES accounts("id"),
+    "agentId" UUID REFERENCES accounts("id")
 );
 
 -- Create tables for both vector sizes

@@ -1172,10 +1172,10 @@ export class AgentRuntime implements IAgentRuntime {
         if (!account) {
             await this.databaseAdapter.createAccount({
                 id: userId,
-                name: name || this.character.name || "???",
-                username: userName || this.character.username || "???",
-                email: email || this.character.email || "???", // Temporary
-                avatarUrl: avatar || `https://api.dicebear.com/9.x/rings/svg?seed=${name.toLowerCase()}` || "???",
+                name: name || this.character.name || "",
+                username: userName || this.character.username || "",
+                email: email || this.character.email || "", // Temporary
+                avatarUrl: avatar || this.character.avatar || "",
                 details: details || {},
             });
             elizaLogger.success(`User ${userName} created successfully.`);
@@ -1241,7 +1241,7 @@ export class AgentRuntime implements IAgentRuntime {
     /**
      * Ensure the existence of a room between the agent and a user. If no room exists, a new room is created and the user
      * and agent are added as participants. The room ID is returned.
-     * @param userId - The user ID to create a room with.
+     * @param roomId - The room ID to create a room with.
      * @returns The room ID of the room between the agent and the user.
      * @throws An error if the room cannot be created.
      */
