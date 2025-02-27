@@ -70,8 +70,9 @@ export function createApiRouter(
         res.send("Welcome, this is the REST API!");
     });
 
-    router.get("/hello", (req, res) => {
-        res.json({ message: "Hello World!" });
+    // Health check endpoint
+    router.get('/ping', (req, res) => {
+        res.status(200).json({ status: 'ok' });
     });
 
     // Apply the API key authentication middleware to all routes below
@@ -451,11 +452,6 @@ export function createApiRouter(
         } else {
             res.status(404).json({ error: "Agent not found" });
         }
-    });
-
-    // Health check endpoint
-    router.get('/ping', (req, res) => {
-        res.status(200).json({ status: 'ok' });
     });
 
     return router;
