@@ -730,6 +730,9 @@ export type Character = {
     /** Optional username */
     username?: string;
 
+    /** Optional avatar */
+    avatar?: string;
+
     /** Optional email */
     email?: string;
 
@@ -1347,7 +1350,10 @@ export interface IAgentRuntime {
         userId: UUID,
         userName: string | null,
         name: string | null,
-        source: string | null,
+        email: string | null,
+        avatar: string | null,
+        details: object | null,
+        source?: string | null,
     ): Promise<void>;
 
     registerAction(action: Action): void;

@@ -297,10 +297,14 @@ export class AgentRuntime implements IAgentRuntime {
         // By convention, we create a user and room using the agent id.
         // Memories related to it are considered global context for the agent.
         this.ensureRoomExists(this.agentId);
+
         this.ensureUserExists(
             this.agentId,
             this.character.username || this.character.name,
             this.character.name,
+            this.character.name,
+            this.character.avatar,
+            this.character
         ).then(() => {
             // postgres needs the user to exist before you can add a participant
             this.ensureParticipantExists(this.agentId, this.agentId);
@@ -1158,17 +1162,21 @@ export class AgentRuntime implements IAgentRuntime {
         userId: UUID,
         userName: string | null,
         name: string | null,
-        email?: string | null,
+        email: string | null,
+        avatar?: string | null,
+        details?: object | null,
         source?: string | null,
     ) {
         const account = await this.databaseAdapter.getAccountById(userId);
+
         if (!account) {
             await this.databaseAdapter.createAccount({
                 id: userId,
-                name: name || this.character.name || "Unknown User",
-                username: userName || this.character.username || "Unknown",
-                email: email || this.character.email || userId, // Temporary
-                details: this.character || { summary: "" },
+                name: name || this.character.name || "???",
+                username: userName || this.character.username || "???",
+                email: email || this.character.email || "???", // Temporary
+                avatarUrl: avatar || `https://api.dicebear.com/9.x/rings/svg?seed=${name.toLowerCase()}` || "???",
+                details: details || {},
             });
             elizaLogger.success(`User ${userName} created successfully.`);
         }
@@ -1194,21 +1202,31 @@ export class AgentRuntime implements IAgentRuntime {
     async ensureConnection(
         userId: UUID,
         roomId: UUID,
-        userName?: string,
-        userScreenName?: string,
+        username?: string,
+        name?: string,
+        email?: string,
+        avatar?: string,
+        details?: object,
         source?: string,
     ) {
         await Promise.all([
+            //  First check for Agent
             this.ensureUserExists(
                 this.agentId,
-                this.character.username ?? "Agent",
-                this.character.name ?? "Agent",
+                this.character.name ?? this.agentId,
+                this.character.username ?? this.agentId,
+                this.character.email ?? this.agentId,
+                this.character.avatar ?? "/ai-agent.png",
+                this.character ?? {},
                 source,
             ),
             this.ensureUserExists(
                 userId,
-                userName ?? "User" + userId,
-                userScreenName ?? "User" + userId,
+                username?.toLowerCase() ?? userId,
+                name?.toLowerCase() ?? userId,
+                email?.toLowerCase() ?? userId,
+                avatar?.toLowerCase() ?? "",
+                details ?? {},
                 source,
             ),
             this.ensureRoomExists(roomId),
