@@ -592,21 +592,28 @@ export class SupabaseDatabaseAdapter extends DatabaseAdapter {
         return [...new Set(data.map((row) => row.roomId as UUID))] as UUID[];
     }
 
-    async createRoom(roomId?: UUID): Promise<UUID> {
+    async createRoom(
+      roomId: UUID
+    ): Promise<UUID> {
         roomId = roomId ?? (uuid() as UUID);
-        const { data, error } = await this.supabase.rpc("create_room", {
-            roomId,
-        });
+
+        const { data, error } = await this.supabase
+          .from("rooms")
+          .insert({
+            id: roomId,
+          })
+          .select('*')
+          .single();
 
         if (error) {
             throw new Error(`Error creating room: ${error.message}`);
         }
 
-        if (!data || data.length === 0) {
+        if (!data) {
             throw new Error("No data returned from room creation");
         }
 
-        return data[0].id as UUID;
+        return data.id as UUID;
     }
 
     async removeRoom(roomId: UUID): Promise<void> {
