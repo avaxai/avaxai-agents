@@ -15,7 +15,7 @@ import {
 } from "@elizaos/core";
 import { normalizeCharacter } from "@elizaos/plugin-di";
 import type { TeeLogQuery, TeeLogService } from "@elizaos/plugin-tee-log";
-import { REST } from "discord.js";
+import { REST, Routes } from "discord.js";
 import type { DirectClient } from ".";
 import { validateUuid } from "@elizaos/core";
 import { apiKeyAuth } from "./middleware.ts";
