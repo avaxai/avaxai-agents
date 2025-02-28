@@ -303,7 +303,6 @@ export class AgentRuntime implements IAgentRuntime {
             this.character.username || this.character.name,
             this.character.name,
             this.character.name,
-            this.character.avatar,
             this.character
         ).then(() => {
             // postgres needs the user to exist before you can add a participant
@@ -1163,7 +1162,6 @@ export class AgentRuntime implements IAgentRuntime {
         userName: string | null,
         name: string | null,
         email: string | null,
-        avatar?: string | null,
         details?: object | null,
         source?: string | null,
     ) {
@@ -1175,7 +1173,6 @@ export class AgentRuntime implements IAgentRuntime {
                 name: name || this.character.name || "",
                 username: userName || this.character.username || "",
                 email: email || this.character.email || "", // Temporary
-                avatarUrl: avatar || this.character.avatar || "",
                 details: details || {},
             });
             elizaLogger.success(`User ${userName} created successfully.`);
@@ -1205,7 +1202,6 @@ export class AgentRuntime implements IAgentRuntime {
         username?: string,
         name?: string,
         email?: string,
-        avatar?: string,
         details?: object,
         source?: string,
     ) {
@@ -1216,7 +1212,6 @@ export class AgentRuntime implements IAgentRuntime {
                 this.character.name ?? this.agentId,
                 this.character.username ?? this.agentId,
                 this.character.email ?? this.agentId,
-                this.character.avatar ?? "/ai-agent.png",
                 this.character ?? {},
                 source,
             ),
@@ -1225,7 +1220,6 @@ export class AgentRuntime implements IAgentRuntime {
                 username?.toLowerCase() ?? userId,
                 name?.toLowerCase() ?? userId,
                 email?.toLowerCase() ?? userId,
-                avatar?.toLowerCase() ?? "",
                 details ?? {},
                 source,
             ),

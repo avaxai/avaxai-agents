@@ -641,7 +641,7 @@ const startAgents = async () => {
     // Get agent characters from supabase
     const { data: agents, error } = await supabase
       .from('agents')
-      .select('character, agentId, agentStatus');
+      .select('character, agentId, status, presence');
 
     if (error) {
         elizaLogger.error('Error fetching agent characters:', error);
@@ -649,7 +649,7 @@ const startAgents = async () => {
         elizaLogger.info('Agent characters fetched from supabase:');
         characters = agents.map((item) => {
           item.character;
-          item.character.agentStatus = item.agentStatus;
+          item.character.presence = item.presence;
           item.character.agentId = item.agentId;
           return item.character;
         });
@@ -664,10 +664,15 @@ const startAgents = async () => {
             elizaLogger.info(`Character ID: ${character.id}`);
             elizaLogger.info(`Character Name: ${character.name}`);
             elizaLogger.info(`Character NFT ID: ${character.agentId}`);
-            elizaLogger.info(`Character Agent Status: ${character.agentStatus}`);
+            elizaLogger.info(`Character Agent Status: ${character.status}`);
+            elizaLogger.info(`Character Agent Presence: ${character.presence}`);
             elizaLogger.info(`===================================================`);
 
-            if (character.agentStatus === "Online") {
+            // Only start agents that are Novice or Prime and stated to be online
+            if (
+              (character.status === "Novice" || character.status === "Prime")
+              && character.presence === "Online"
+            ) {
                 elizaLogger.info(`Starting agent for character: ${character.name}`);
                 const runtime = await startAgent(character, directClient);
                 // Store the runtime in our activeAgents map
