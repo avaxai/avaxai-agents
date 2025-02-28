@@ -208,6 +208,8 @@ export class DirectClient {
                 // );
                 const roomId = req.body.roomId;
                 const text = req.body.text;
+                // Are we expecting a response from the agent?
+                const expectResponse = req.body.expectResponse;
 
                 let runtime = this.agents.get(agentId);
 
@@ -283,6 +285,11 @@ export class DirectClient {
                     state,
                     template: messageHandlerTemplate,
                 });
+
+                if (!expectResponse) {
+                  res.json([]);
+                  return;
+              }
 
                 const response = await generateMessageResponse({
                     runtime: runtime,

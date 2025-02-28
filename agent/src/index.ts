@@ -651,6 +651,7 @@ const startAgents = async () => {
           item.character;
           item.character.presence = item.presence;
           item.character.agentId = item.agentId;
+          item.character.status = item.status;
           return item.character;
         });
     }

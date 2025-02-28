@@ -79,12 +79,15 @@ export function createApiRouter(
     router.use(apiKeyAuth);
 
     router.get("/agents", (req, res) => {
-        const agentsList = Array.from(agents.values()).map((agent) => ({
-            id: agent.agentId,
-            name: agent.character.name,
-            clients: Object.keys(agent.clients),
-        }));
-        res.json({ agents: agentsList });
+        const agentsMap = {};
+        Array.from(agents.values()).forEach((agent) => {
+            agentsMap[agent.agentId] = {
+                id: agent.agentId,
+                name: agent.character.name,
+                clients: Object.keys(agent.clients),
+            };
+        });
+        res.json({ agents: agentsMap });
     });
 
     router.get('/storage', async (req, res) => {
