@@ -1184,6 +1184,9 @@ export const models: Models = {
             [ModelClass.EMBEDDING]: {
                 name: "text-embedding-3-small",
             },
+            [ModelClass.IMAGE]: {
+              name: "dall-e-3",
+          },
         },
     },
     [ModelProviderName.OPENROUTER_ANTHROPIC]: {
@@ -1272,7 +1275,7 @@ export const models: Models = {
                 name:
                     settings.SMALL_GOOGLE_MODEL ||
                     settings.GOOGLE_MODEL ||
-                    "gemini-2.0-flash-exp",
+                    "google/gemini-2.0-flash-lite-001",
                 stop: [],
                 maxInputTokens: 128000,
                 maxOutputTokens: 8192,
@@ -1284,7 +1287,7 @@ export const models: Models = {
                 name:
                     settings.MEDIUM_GOOGLE_MODEL ||
                     settings.GOOGLE_MODEL ||
-                    "gemini-2.0-flash-exp",
+                    "google/gemini-2.0-flash-001",
                 stop: [],
                 maxInputTokens: 128000,
                 maxOutputTokens: 8192,
@@ -1296,7 +1299,7 @@ export const models: Models = {
                 name:
                     settings.LARGE_GOOGLE_MODEL ||
                     settings.GOOGLE_MODEL ||
-                    "gemini-2.0-flash-exp",
+                    "google/gemini-2.0-flash-001",
                 stop: [],
                 maxInputTokens: 128000,
                 maxOutputTokens: 8192,
@@ -1305,10 +1308,7 @@ export const models: Models = {
                 temperature: 0.7,
             },
             [ModelClass.EMBEDDING]: {
-                name:
-                    settings.EMBEDDING_GOOGLE_MODEL ||
-                    settings.GOOGLE_MODEL ||
-                    "text-embedding-004",
+                name: "text-embedding-004",
             },
         },
     },
