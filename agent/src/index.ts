@@ -641,11 +641,9 @@ const startAgents = async () => {
     const charactersArg = args.characters || args.character;
     let characters = [];
 
-    elizaLogger.info('Starting agents with default character:', characters);
-
-    if (charactersArg || hasValidRemoteUrls()) {
-        characters = await loadCharacters(charactersArg);
-    }
+    // if (charactersArg || hasValidRemoteUrls()) {
+    //     characters = await loadCharacters(charactersArg);
+    // }
 
     // Get agent characters from supabase
     const { data: agents, error } = await supabase
@@ -653,8 +651,9 @@ const startAgents = async () => {
       .select(`
         character, 
         agentId, 
-        status, 
-        presence, 
+        status,
+        dmCapabilities,
+        forumCapabilities,
         xCapabilities,
         xConfig
       `);
@@ -665,9 +664,8 @@ const startAgents = async () => {
         elizaLogger.info('Agent characters fetched from supabase:');
         characters = agents.map((item) => {
           item.character;
-          item.character.presence = item.presence;
-          item.character.agentId = item.agentId;
-          item.character.status = item.status;
+          item.character.dmCapabilities = item.dmCapabilities;
+          item.character.forumCapabilities = item.forumCapabilities;
           item.character.xCapabilities = item.xCapabilities;
           item.character.xConfig = item.xConfig;
           return item.character;
@@ -677,23 +675,23 @@ const startAgents = async () => {
     // Normalize characters for injectable plugins
     characters = await Promise.all(characters.map(normalizeCharacter));
 
+    elizaLogger.info("Starting agents:", characters);
+
     try {
         for (const character of characters) {
-            elizaLogger.info(`===================================================`);
+            elizaLogger.info('===================================================');
             elizaLogger.info(`Character ID: ${character.id}`);
             elizaLogger.info(`Character Name: ${character.name}`);
             elizaLogger.info(`Character NFT ID: ${character.agentId}`);
             elizaLogger.info(`Character Agent Status: ${character.status}`);
-            elizaLogger.info(`Character Agent Presence: ${character.presence}`);
+            elizaLogger.info(`Character Agent DM Capabilities: ${character.dmCapabilities}`);
+            elizaLogger.info(`Character Agent Forum Capabilities: ${character.forumCapabilities}`);
             elizaLogger.info(`Character Agent Capabilities: ${character.xCapabilities}`);
             elizaLogger.info(`Character Agent Config: ${character.xConfig}`);
-            elizaLogger.info(`===================================================`);
+            elizaLogger.info('===================================================');
 
             // Only start agents that are Novice or Prime and stated to be online
-            if (
-              (character.status === "Novice" || character.status === "Prime")
-              && character.presence === "Online"
-            ) {
+            if (character.status === "Novice" || character.status === "Prime") {
                 elizaLogger.info(`Starting agent for character: ${character.name}`);
                 const runtime = await startAgent(character, directClient);
                 // Store the runtime in our activeAgents map
