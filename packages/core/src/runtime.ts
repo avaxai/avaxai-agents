@@ -574,6 +574,11 @@ export class AgentRuntime implements IAgentRuntime {
         // have actions, providers, evaluators (no start/stop)
         // services (just initialized), clients
 
+        console.log("================");
+        console.log("this.clients");
+        console.log(this.clients);
+        console.log("================");
+
         // client have a start
         for (const cStr in this.clients) {
             const c = this.clients[cStr];
@@ -583,7 +588,13 @@ export class AgentRuntime implements IAgentRuntime {
                 "client stop for",
                 this.character.name,
             );
-            c.stop();
+            console.log('================')
+            console.log("c");
+            console.log(c)
+            console.log('================')
+            if (c !== 'twitter') {
+              c.stop();
+            }
         }
         // we don't need to unregister with directClient
         // don't need to worry about knowledge
@@ -600,6 +611,7 @@ export class AgentRuntime implements IAgentRuntime {
             const knowledgeId = stringToUuid(item);
             const existingDocument =
                 await this.documentsManager.getMemoryById(knowledgeId);
+            
             if (existingDocument) {
                 continue;
             }

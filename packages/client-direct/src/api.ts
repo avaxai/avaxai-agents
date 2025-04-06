@@ -80,13 +80,13 @@ export function createApiRouter(
 
     router.get("/agents", (req, res) => {
         const agentsMap = {};
-        Array.from(agents.values()).forEach((agent) => {
+        for (const agent of agents.values()) {
             agentsMap[agent.agentId] = {
                 id: agent.agentId,
                 name: agent.character.name,
                 clients: Object.keys(agent.clients),
             };
-        });
+        }
         res.json({ agents: agentsMap });
     });
 
@@ -414,6 +414,15 @@ export function createApiRouter(
 
     router.post("/agent/start", async (req, res) => {
         const character: Character = req.body;
+        const agentId = character.id;
+        const agent: AgentRuntime = agents.get(agentId);
+
+        // Check to see agent is not already running
+        // If so, stop it. This flow can also be used for restarting a running agent
+        if (agent) {
+            await agent.stop();
+            await directClient.unregisterAgent(agent);
+        }
         
         try {
             validateCharacterConfig(character);
@@ -442,7 +451,6 @@ export function createApiRouter(
 
     router.delete("/agents/:agentId/stop", async (req, res) => {
         const agentId = req.params.agentId;
-        console.log("agentId", agentId);
         const agent: AgentRuntime = agents.get(agentId);
 
         // update character

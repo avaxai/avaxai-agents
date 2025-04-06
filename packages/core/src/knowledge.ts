@@ -70,7 +70,7 @@ async function set(
     chunkSize = 512,
     bleed = 20
 ) {
-    await runtime.documentsManager.createMemory({
+    const memory = {
         id: item.id,
         agentId: runtime.agentId,
         roomId: runtime.agentId,
@@ -78,7 +78,10 @@ async function set(
         createdAt: Date.now(),
         content: item.content,
         embedding: getEmbeddingZeroVector(),
-    });
+    };
+    
+    await runtime.documentsManager.addEmbeddingToMemory(memory);
+    await runtime.documentsManager.createMemory(memory);
 
     const preprocessed = preprocess(item.content.text);
     const fragments = await splitChunks(preprocessed, chunkSize, bleed);

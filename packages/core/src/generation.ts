@@ -1565,7 +1565,6 @@ export async function generateText({
                 break;
             }
             
-            
             case ModelProviderName.OPENROUTER_DEEPSEEK: {
                 elizaLogger.debug("Initializing OpenRouter Deepseek model.");
                 const serverUrl = getEndpoint(provider);

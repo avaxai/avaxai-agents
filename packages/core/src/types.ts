@@ -957,6 +957,14 @@ export type Character = {
     extends?: string[];
 
     twitterSpaces?: TwitterSpaceDecisionOptions;
+
+    xConfig?: {
+        username?: string;
+        password?: string;
+        email?: string;
+        generate?: boolean;
+        interval?: number;
+    };
 };
 
 export interface TwitterSpaceDecisionOptions {

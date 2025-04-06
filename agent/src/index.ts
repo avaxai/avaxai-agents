@@ -24,6 +24,7 @@ import {
 } from "@elizaos/core";
 import { normalizeCharacter } from "@elizaos/plugin-di";
 import { createNodePlugin } from "@elizaos/plugin-node";
+import { TwitterClientInterface } from "@elizaos/client-twitter";
 import fs from "fs";
 import net from "net";
 import path from "path";
@@ -417,7 +418,15 @@ export async function initializeClients(
     const clients: Record<string, any> = {};
     const clientTypes: string[] =
         character.clients?.map((str) => str.toLowerCase()) || [];
+    
     elizaLogger.log("initializeClients", clientTypes, "for", character.name);
+
+    if (clientTypes.includes(Clients.TWITTER)) {
+        const twitterClient = await TwitterClientInterface.start(runtime);
+        if (twitterClient) {
+            clients.twitter = twitterClient;
+        }
+    }
 
     function determineClientType(client: Client): string {
         // Check if client has a direct type identifier
@@ -641,7 +650,14 @@ const startAgents = async () => {
     // Get agent characters from supabase
     const { data: agents, error } = await supabase
       .from('agents')
-      .select('character, agentId, status, presence');
+      .select(`
+        character, 
+        agentId, 
+        status, 
+        presence, 
+        xCapabilities,
+        xConfig
+      `);
 
     if (error) {
         elizaLogger.error('Error fetching agent characters:', error);
@@ -652,6 +668,8 @@ const startAgents = async () => {
           item.character.presence = item.presence;
           item.character.agentId = item.agentId;
           item.character.status = item.status;
+          item.character.xCapabilities = item.xCapabilities;
+          item.character.xConfig = item.xConfig;
           return item.character;
         });
     }
@@ -667,6 +685,8 @@ const startAgents = async () => {
             elizaLogger.info(`Character NFT ID: ${character.agentId}`);
             elizaLogger.info(`Character Agent Status: ${character.status}`);
             elizaLogger.info(`Character Agent Presence: ${character.presence}`);
+            elizaLogger.info(`Character Agent Capabilities: ${character.xCapabilities}`);
+            elizaLogger.info(`Character Agent Config: ${character.xConfig}`);
             elizaLogger.info(`===================================================`);
 
             // Only start agents that are Novice or Prime and stated to be online

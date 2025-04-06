@@ -152,6 +152,15 @@ export const CharacterSchema = z.object({
         })
         .optional(),
     extends: z.array(z.string()).optional(),
+    
+    xCapabilities: z.boolean().optional(),
+    xConfig: z.object({
+        username: z.string().optional(),
+        password: z.string().optional(),
+        email: z.string().optional(),
+        generate: z.boolean().optional(),
+        interval: z.number().optional(),
+    }).optional(),
 });
 
 // Type inference
