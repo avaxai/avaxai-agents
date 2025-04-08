@@ -690,8 +690,8 @@ const startAgents = async () => {
             elizaLogger.info(`Character Agent Config: ${character.xConfig}`);
             elizaLogger.info('===================================================');
 
-            // Only start agents that are Novice or Prime and stated to be online
-            if (character.status === "Novice" || character.status === "Prime") {
+            // Only start agents that are Beta or Alpha and stated to be online
+            if (character.status === "Beta" || character.status === "Alpha") {
                 elizaLogger.info(`Starting agent for character: ${character.name}`);
                 const runtime = await startAgent(character, directClient);
                 // Store the runtime in our activeAgents map
